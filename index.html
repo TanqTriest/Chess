@@ -38,7 +38,7 @@
             <!-- Bàn cờ -->
             <section class="board-column" aria-label="Bàn cờ">
                 <div class="player-strip opponent-strip">
-                    <div class="player-avatar bot-avatar">♟</div>
+                    <div class="player-avatar bot-avatar" id="botAvatar">♟</div>
                     <div class="player-meta">
                         <strong>Chess Bot</strong>
                         <span><span id="botEngine">Stockfish</span> · <span id="botLevelLabel">Trung bình</span></span>
@@ -51,10 +51,10 @@
                 </div>
 
                 <div class="player-strip human-strip">
-                    <div class="player-avatar human-avatar">♙</div>
+                    <div class="player-avatar human-avatar" id="humanAvatar">♙</div>
                     <div class="player-meta">
                         <strong>Bạn</strong>
-                        <span>Quân Trắng</span>
+                        <span id="humanSide">Quân Trắng</span>
                     </div>
                     <div id="humanClock" class="clock-display active-clock">10:00</div>
                 </div>
@@ -73,6 +73,15 @@
                 <div class="status-box" role="status" aria-live="polite">
                     <span class="status-indicator"></span>
                     <span id="statusVar">Đến lượt bạn</span>
+                </div>
+
+                <div class="side-pick" role="radiogroup" aria-label="Chọn quân">
+                    <span class="control-label">Bạn cầm quân</span>
+                    <div class="seg">
+                        <button type="button" class="seg-btn" data-side="w" role="radio" aria-checked="true"><span class="seg-ico">♔</span>Trắng</button>
+                        <button type="button" class="seg-btn" data-side="b" role="radio" aria-checked="false"><span class="seg-ico">♚</span>Đen</button>
+                        <button type="button" class="seg-btn" data-side="r" role="radio" aria-checked="false"><span class="seg-ico">⚄</span>Ngẫu nhiên</button>
+                    </div>
                 </div>
 
                 <div class="controls-grid">
@@ -127,7 +136,7 @@
         </main>
 
         <p class="footer-hint">
-            Kéo-thả hoặc chạm quân → chạm ô đến &nbsp;•&nbsp; Chấm: nước hợp lệ &nbsp;•&nbsp; Đổi thời gian/cấp độ sẽ tạo ván mới
+            Kéo-thả hoặc chạm quân → chạm ô đến &nbsp;•&nbsp; Chấm: nước hợp lệ &nbsp;•&nbsp; Đổi quân/thời gian/cấp độ sẽ tạo ván mới
         </p>
     </div>
 

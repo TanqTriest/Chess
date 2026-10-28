@@ -52,7 +52,8 @@ const DEFAULTS = {
     volume: 0.6,
     sound: true,
     level: 'Trung bình',
-    mode: '10 phút'
+    mode: '10 phút',
+    side: 'w'             // bên bạn cầm: 'w' Trắng, 'b' Đen, 'r' ngẫu nhiên
 };
 
 const SYMBOLS = {
@@ -233,6 +234,15 @@ class ChessArena {
         $('undoBtn').addEventListener('click', () => this.undo());
         $('newGameBtn').addEventListener('click', () => this.newGame());
         $('rotateBtn').addEventListener('click', () => this.rotate());
+
+        // Chọn quân Trắng / Đen / Ngẫu nhiên -> bắt đầu ván mới
+        document.querySelectorAll('.seg-btn').forEach((btn) => {
+            btn.addEventListener('click', () => {
+                this.settings.side = btn.dataset.side;
+                this.saveSettings();
+                this.newGame();
+            });
+        });
 
         document.querySelectorAll('.promo-btn').forEach((btn) => {
             btn.addEventListener('click', (e) => this.resolvePromotion(e.currentTarget.dataset.piece));
@@ -833,12 +843,14 @@ class ChessArena {
 
     undo() {
         if (this.net) return; // online: không hoàn tác
-        this.syncTime();
-        this.cancelCpu();
-        if (this.board.history().length === 0) {
+        // Bạn cầm Đen: nước đầu tiên là của Stockfish, không có nước nào của bạn để hoàn tác
+        const minMoves = this.humanColor === 'b' ? 2 : 1;
+        if (this.board.history().length < minMoves) {
             this.setStatus('Chưa có nước đi để hoàn tác.');
             return;
         }
+        this.syncTime();
+        this.cancelCpu();
         this.board.undo();
         if (this.board.turn() !== this.humanColor && this.board.history().length > 0) this.board.undo();
 
@@ -854,9 +866,29 @@ class ChessArena {
         this.draw();
     }
 
+    // Chọn bên cho ván mới, cập nhật bàn cờ + nhãn người chơi
+    applySide() {
+        const pick = this.settings.side;
+        if (!this.net) {   // online: màu do server cấp, không tự chọn
+            this.humanColor = pick === 'r' ? (Math.random() < 0.5 ? 'w' : 'b') : (pick === 'b' ? 'b' : 'w');
+        }
+        const white = this.humanColor === 'w';
+        this.flip = !white;                       // quân của bạn luôn ở phía dưới
+
+        const set = (id, text) => { const el = document.getElementById(id); if (el) el.textContent = text; };
+        set('humanSide', white ? 'Quân Trắng' : 'Quân Đen');
+        set('humanAvatar', white ? '♙' : '♟');
+        set('botAvatar', white ? '♟' : '♙');
+
+        document.querySelectorAll('.seg-btn').forEach((btn) => {
+            btn.setAttribute('aria-checked', String(btn.dataset.side === pick));
+        });
+    }
+
     newGame() {
         this.cancelCpu();
         this.board.reset();
+        this.applySide();
         if (this.sf && this.sf.ready) this.sf.worker.postMessage('ucinewgame');
         this.selected = this.dragOrigin = this.lastMove = null;
         this.dragging = false;
@@ -866,12 +898,14 @@ class ChessArena {
         const t = secs === null ? 600 : secs;
         this.remaining = { w: t, b: t };
         this.clockStart = performance.now();
-        this.setStatus('Ván mới — đến lượt bạn (Trắng)');
+        const white = this.humanColor === 'w';
+        this.setStatus(white ? 'Ván mới — đến lượt bạn (Trắng)' : 'Ván mới — bạn cầm Đen, Stockfish đi trước');
         const lbl = document.getElementById('botLevelLabel');
         if (lbl) lbl.textContent = this.el.level.value;
         this.showHistory();
         this.draw();
         this.tick();
+        if (!white && !this.net) this.scheduleCpu();   // Trắng là Stockfish -> đi nước đầu
     }
 
     rotate() {
