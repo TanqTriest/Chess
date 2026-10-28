@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <title>Chess Arena | Bạn vs CPU</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="theme-color" content="#0a1020">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;700&display=swap">
+    <link rel="stylesheet" href="style.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/chess.js/0.10.3/chess.min.js"></script>
+</head>
+<body>
+    <div class="bg-glow" aria-hidden="true"></div>
+
+    <div class="wrapper">
+        <header class="header">
+            <div class="brand">
+                <span class="brand-mark">♞</span>
+                <div>
+                    <div class="title-left">Chess Arena</div>
+                    <div class="brand-subtitle">Luyện tập · từng nước một</div>
+                </div>
+            </div>
+            <div class="header-actions">
+                <div class="title-right"><span class="mode-dot"></span>Chế độ CPU</div>
+                <button class="icon-btn" id="settingsBtn" type="button" aria-label="Cài đặt" title="Cài đặt">
+                    <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/></svg>
+                </button>
+            </div>
+        </header>
+
+        <main class="main-container">
+            <!-- Bàn cờ -->
+            <section class="board-column" aria-label="Bàn cờ">
+                <div class="player-strip opponent-strip">
+                    <div class="player-avatar bot-avatar">♟</div>
+                    <div class="player-meta">
+                        <strong>Chess Bot</strong>
+                        <span><span id="botEngine">Stockfish</span> · <span id="botLevelLabel">Trung bình</span></span>
+                    </div>
+                    <div id="cpuClock" class="clock-display">10:00</div>
+                </div>
+
+                <div class="canvas-wrapper">
+                    <canvas id="chessCanvas" width="560" height="560"></canvas>
+                </div>
+
+                <div class="player-strip human-strip">
+                    <div class="player-avatar human-avatar">♙</div>
+                    <div class="player-meta">
+                        <strong>Bạn</strong>
+                        <span>Quân Trắng</span>
+                    </div>
+                    <div id="humanClock" class="clock-display active-clock">10:00</div>
+                </div>
+            </section>
+
+            <!-- Bảng điều khiển -->
+            <aside class="side-panel">
+                <div class="panel-heading">
+                    <div>
+                        <span class="eyebrow">Trận đấu</span>
+                        <h1>Đấu với Stockfish</h1>
+                    </div>
+                    <span class="game-badge">CPU</span>
+                </div>
+
+                <div class="status-box" role="status" aria-live="polite">
+                    <span class="status-indicator"></span>
+                    <span id="statusVar">Đến lượt bạn</span>
+                </div>
+
+                <div class="controls-grid">
+                    <div class="field">
+                        <label class="control-label" for="levelSelect">Cấp độ CPU</label>
+                        <select id="levelSelect" data-setting="level">
+                            <option value="Dễ">Dễ</option>
+                            <option value="Trung bình" selected>Trung bình</option>
+                            <option value="Khó">Khó</option>
+                            <option value="Cao thủ">Cao thủ</option>
+                        </select>
+                    </div>
+                    <div class="field">
+                        <label class="control-label" for="modeSelect">Thời gian</label>
+                        <select id="modeSelect" data-setting="mode">
+                            <option value="3 phút">3 phút</option>
+                            <option value="5 phút">5 phút</option>
+                            <option value="10 phút" selected>10 phút</option>
+                            <option value="15 phút">15 phút</option>
+                            <option value="Không giới hạn">Không giới hạn</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="history-section">
+                    <div class="label-history"><span>Lịch sử nước đi</span><span class="history-format">SAN</span></div>
+                    <div class="history-box">
+                        <textarea id="historyText" readonly aria-label="Lịch sử nước đi"></textarea>
+                    </div>
+                </div>
+
+                <div class="buttons-grid">
+                    <button class="btn btn-normal" id="undoBtn" type="button">
+                        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 14 4 9l5-5"/><path d="M4 9h10.5a5.5 5.5 0 0 1 0 11H11"/></svg>
+                        Hoàn tác
+                    </button>
+                    <button class="btn btn-accent" id="newGameBtn" type="button">
+                        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M21 12a9 9 0 1 1-3-6.7"/><path d="M21 4v5h-5"/></svg>
+                        Ván mới
+                    </button>
+                    <button class="btn btn-normal" id="rotateBtn" type="button">
+                        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 4v16M7 4 3 8m4-4 4 4M17 20V4m0 16-4-4m4 4 4-4"/></svg>
+                        Xoay bàn cờ
+                    </button>
+                    <label class="switch" for="soundCheck">
+                        <input type="checkbox" id="soundCheck" data-setting="sound" checked>
+                        <span class="switch-track"><span class="switch-thumb"></span></span>
+                        <span>Âm thanh</span>
+                    </label>
+                </div>
+            </aside>
+        </main>
+
+        <p class="footer-hint">
+            Kéo-thả hoặc chạm quân → chạm ô đến &nbsp;•&nbsp; Chấm: nước hợp lệ &nbsp;•&nbsp; Đổi thời gian/cấp độ sẽ tạo ván mới
+        </p>
+    </div>
+
+    <!-- Cài đặt -->
+    <div id="settingsModal" class="modal settings-modal hidden" role="dialog" aria-modal="true" aria-labelledby="settingsTitle">
+        <div class="settings-sheet">
+            <div class="sheet-head">
+                <h3 id="settingsTitle">Cài đặt</h3>
+                <button class="icon-btn" id="settingsClose" type="button" aria-label="Đóng">
+                    <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6 6 18"/></svg>
+                </button>
+            </div>
+
+            <section class="set-group">
+                <h4>Bàn cờ</h4>
+                <div class="set-row">
+                    <label for="set-theme">Bảng màu</label>
+                    <select id="set-theme" data-setting="theme">
+                        <option value="steel">Xanh thép</option>
+                        <option value="green">Xanh lá</option>
+                        <option value="wood">Gỗ cổ điển</option>
+                        <option value="purple">Tím</option>
+                        <option value="midnight">Đêm</option>
+                    </select>
+                </div>
+                <label class="set-row"><span>Hiện nước đi hợp lệ</span>
+                    <span class="switch"><input type="checkbox" data-setting="showLegal"><span class="switch-track"><span class="switch-thumb"></span></span></span></label>
+                <label class="set-row"><span>Tô sáng nước vừa đi</span>
+                    <span class="switch"><input type="checkbox" data-setting="showLast"><span class="switch-track"><span class="switch-thumb"></span></span></span></label>
+                <label class="set-row"><span>Hiện tọa độ</span>
+                    <span class="switch"><input type="checkbox" data-setting="showCoords"><span class="switch-track"><span class="switch-thumb"></span></span></span></label>
+            </section>
+
+            <section class="set-group">
+                <h4>Quân cờ</h4>
+                <div class="set-row range-row">
+                    <label for="set-size">Cỡ quân</label>
+                    <output data-for="pieceSize"></output>
+                    <input id="set-size" type="range" min="36" max="58" step="1" data-setting="pieceSize">
+                </div>
+                <div class="set-row range-row">
+                    <label for="set-white">Độ dày viền quân Trắng</label>
+                    <output data-for="whiteStroke"></output>
+                    <input id="set-white" type="range" min="2" max="14" step="0.5" data-setting="whiteStroke">
+                </div>
+                <div class="set-row range-row">
+                    <label for="set-black">Độ dày viền quân Đen</label>
+                    <output data-for="blackStroke"></output>
+                    <input id="set-black" type="range" min="1" max="10" step="0.5" data-setting="blackStroke">
+                </div>
+            </section>
+
+            <section class="set-group">
+                <h4>Lối chơi</h4>
+                <label class="set-row"><span>Tự động phong cấp thành Hậu</span>
+                    <span class="switch"><input type="checkbox" data-setting="autoQueen"><span class="switch-track"><span class="switch-thumb"></span></span></span></label>
+                <div class="set-row range-row">
+                    <label for="set-delay">Độ trễ trước khi CPU đi</label>
+                    <output data-for="cpuDelay"></output>
+                    <input id="set-delay" type="range" min="0" max="1500" step="50" data-setting="cpuDelay">
+                </div>
+            </section>
+
+            <section class="set-group">
+                <h4>Âm thanh</h4>
+                <div class="set-row range-row">
+                    <label for="set-volume">Âm lượng</label>
+                    <output data-for="volume"></output>
+                    <input id="set-volume" type="range" min="0" max="1" step="0.05" data-setting="volume">
+                </div>
+                <p class="set-note">Bật/tắt âm thanh ở công tắc trong bảng điều khiển.</p>
+            </section>
+
+            <button class="btn btn-normal reset-btn" id="settingsReset" type="button">Khôi phục mặc định</button>
+        </div>
+    </div>
+
+    <!-- Chọn quân phong cấp -->
+    <div id="promotionModal" class="modal hidden" role="dialog" aria-modal="true" aria-labelledby="promoTitle">
+        <div class="modal-content">
+            <h3 id="promoTitle">Chọn quân phong cấp</h3>
+            <div class="promo-grid">
+                <button class="promo-btn" data-piece="q" type="button"><span>♕</span>Hậu</button>
+                <button class="promo-btn" data-piece="r" type="button"><span>♖</span>Xe</button>
+                <button class="promo-btn" data-piece="b" type="button"><span>♗</span>Tượng</button>
+                <button class="promo-btn" data-piece="n" type="button"><span>♘</span>Mã</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
