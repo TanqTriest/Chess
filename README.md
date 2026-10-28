@@ -1,4 +1,4 @@
-# ♞ Chess Arena |
+# ♞ Chess Arena 
 
 Trò chơi **Chess Arena** (Cờ Vua) được viết lại hoàn toàn bằng **HTML5 Canvas, CSS3 và Vanilla JavaScript (ES6+)** với giao diện hiện đại phong cách Esports, tích hợp thư viện quản lý luật cờ `chess.js`, thuật toán Trí tuệ nhân tạo (AI Minimax + Alpha-Beta Pruning + Quiescence Search) ngay trên trình duyệt, cùng nhiều tính năng tùy biến linh hoạt và âm thanh sinh động.
 
